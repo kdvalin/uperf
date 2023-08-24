@@ -110,51 +110,6 @@ AC_LINK_IFELSE([AC_LANG_SOURCE[#include <sys/sendfile.h>
 # Check for PTHREAD_PROCESS_SHARED. Have to run it to see if it works
 # as its declared, but does not work on FreeBSD
 LIBS="$UPERF_LIBS"
-AC_MSG_CHECKING(if we can have working PTHREAD_PROCESS_SHARED)
-process_shared_works=yes
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#include <pthread.h>
-#include <sys/types.h>
-int
-main(int argc, char *argv[])
-{
-	pthread_rwlockattr_t rwattr;
-	pthread_rwlock_t barrier;
-	pthread_mutexattr_t attr;
-	pthread_mutex_t lock;
-
-	if (pthread_mutexattr_init(&attr)) {
-		return (1);
-	}
-	if (pthread_mutexattr_setpshared(&attr, PTHREAD_PROCESS_SHARED)) {
-		return (1);
-	}
-	if (pthread_mutex_init(&lock, &attr)) {
-		return (1);
-	}
-	if (pthread_mutex_lock(&lock)) {
-		return (1);
-	}
-	if (pthread_mutex_unlock(&lock)) {
-		return (1);
-	}
-	if (pthread_rwlockattr_init(&rwattr))
-		return (1);
-	if (pthread_rwlockattr_setpshared(&rwattr, PTHREAD_PROCESS_SHARED))
-		return (1);
-	if (pthread_rwlock_init(&barrier, &rwattr))
-		return (1);
-	if (pthread_rwlock_wrlock(&barrier))
-		return (1);
-	if (pthread_rwlock_unlock(&barrier))
-		return (1);
-	return (0);
-}]])],[AC_MSG_RESULT(yes)],[
-      AC_MSG_RESULT(no)
-      AC_DEFINE([STRAND_THREAD_ONLY], [1], [Use only threads])
-      AM_CONDITIONAL([HAVE_PROCESSES], [false])
-
-],[])
 # Checks for libraries.
 AC_MSG_CHECKING(whether to enable cpu performance counters support?)
 AC_ARG_ENABLE(cpc,
